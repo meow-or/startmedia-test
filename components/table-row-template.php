@@ -1,5 +1,5 @@
     <template id="table-row">
-      <li class="table__row">
+      <li class="table__row table__row-rendered-list">
           <ul class="table__row-list">
             <li class="table__row-item table__row-item_number"></li>
             <li class="table__row-item table__row-item_name"></li>

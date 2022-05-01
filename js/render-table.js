@@ -6,18 +6,8 @@ const listOfRowsFragment = document.createDocumentFragment();
 
 
 const addRowData = (
-  {
-    name,
-    city,
-    car,
-    startNumber,
-    firstAttempt,
-    secondtAttempt,
-    thirdAttempt,
-    fourthAttempt,
-    totalScore,
-    place
-  }) => {
+  {name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place}) => {
+  
   const rowData = tableRowTemplate.cloneNode(true);
 
   rowData.querySelector('.table__row-item_number').textContent = startNumber;
@@ -25,7 +15,7 @@ const addRowData = (
   rowData.querySelector('.table__row-item_city').textContent = city;
   rowData.querySelector('.table__row-item_car').textContent = car;
   rowData.querySelector('.table__row-item_first-attempt').textContent = firstAttempt;
-  rowData.querySelector('.table__row-item_second-attempt').textContent = secondtAttempt;
+  rowData.querySelector('.table__row-item_second-attempt').textContent = secondAttempt;
   rowData.querySelector('.table__row-item_third-attempt').textContent = thirdAttempt;
   rowData.querySelector('.table__row-item_fourth-attempt').textContent = fourthAttempt;
   rowData.querySelector('.table__row-item_score').textContent = totalScore;
@@ -80,13 +70,43 @@ const createTableDataArray = (idsArray, attemptsData, carsData) => {
       'car': getParticipantCar(i),
       'startNumber': getParticipantStartNumber(i),
       'firstAttempt': getAttemptScore(i, 0),
-      'secondtAttempt': getAttemptScore(i, 1),
+      'secondAttempt': getAttemptScore(i, 1),
       'thirdAttempt': getAttemptScore(i, 2),
       'fourthAttempt': getAttemptScore(i, 3),
       'totalScore': getTotalScore(i),
     })
   }
   return tableDataArray;
+}
+
+const createPlaceAndScoreArray = (data) => {
+  const totalScoreArray = [];
+
+  data.forEach(({totalScore}) => totalScoreArray.push(totalScore));
+  const sortedTotalScoreArray = totalScoreArray.sort(compare);
+  
+  const placeAndScoreArray = [];
+  for (let i = 1; i <= sortedTotalScoreArray.length; i++) {
+    placeAndScoreArray.push({
+      'participantPlace': i,
+      'score': sortedTotalScoreArray[i - 1]
+    })
+  }
+
+  return placeAndScoreArray;
+}
+
+const createRankedTableData = (data, placesAndScoresArray) => {
+  const rankedTableData = [];
+
+  data.forEach((tableRowData) => rankedTableData.push(
+    {
+      ...tableRowData,
+      'place': placesAndScoresArray.find((placeAndScore) => placeAndScore.score === tableRowData.totalScore)
+    }
+  ))
+
+  return rankedTableData;
 }
 
 const compareTotalScore = (prev, next) => {
@@ -119,70 +139,117 @@ const compareFourthAttemptScore = (prev, next) => {
   return nextScore - prevScore;
 }
 
-export const renderRows = (cars, attempts) => {
+const clearRowsContainer = () => {
+  const renderedRows = tableRowContainer.querySelectorAll('.table__row-rendered-list');
+  renderedRows.forEach(row => row.remove());
+}
+
+export const renderTable = (cars, attempts) => {
   const attemptsDataArray = Object.entries(attempts);
   const carsDataArray = Object.entries(cars);
   const carIds = getCarIds(carsDataArray);
   const tableData = createTableDataArray(carIds, attemptsDataArray, carsDataArray);
-
-  const createPlaceAndScoreArray = () => {
-    const totalScoreArray = [];
-
-    tableData.forEach(({totalScore}) => totalScoreArray.push(totalScore));
-    const sortedTotalScoreArray = totalScoreArray.sort(compare);
-    
-    const placeAndScoreArray = [];
-    for (let i = 1; i <= sortedTotalScoreArray.length; i++) {
-      placeAndScoreArray.push({
-        'participantPlace': i,
-        'score': sortedTotalScoreArray[i - 1]
-      })
-    }
-
-    return placeAndScoreArray;
-  }
-
-  const placesAndScores = createPlaceAndScoreArray();
-  const rankedTableData = [];
-
-  tableData.forEach((tableRowData) => rankedTableData.push(
-    {
-      ...tableRowData,
-      'place': placesAndScores.find((placeAndScore) => placeAndScore.score === tableRowData.totalScore)
-    }
-  ))
-
+  const placesAndScores = createPlaceAndScoreArray(tableData);
+  const rankedTableData = createRankedTableData(tableData, placesAndScores);
+  document.querySelector('.total-score').classList.add('table__row-button_active');  
   rankedTableData
   .slice()
   .sort(compareTotalScore)
   .forEach(
-    ({
-      name,
-      city,
-      car,
-      startNumber,
-      firstAttempt,
-      secondtAttempt,
-      thirdAttempt,
-      fourthAttempt,
-      totalScore,
-      place
-    }) => {
+    ({name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place}) => {
 
     addRowData(
-      {
-        name,
-        city,
-        car,
-        startNumber,
-        firstAttempt,
-        secondtAttempt,
-        thirdAttempt,
-        fourthAttempt,
-        totalScore,
-        place
-      })
+      {name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place})
   })
 
+  clearRowsContainer();
+  tableRowContainer.appendChild(listOfRowsFragment);
+}
+
+export const renderTableSortedByFirstAttempt = (cars, attempts) => {
+  const attemptsDataArray = Object.entries(attempts);
+  const carsDataArray = Object.entries(cars);
+  const carIds = getCarIds(carsDataArray);
+  const tableData = createTableDataArray(carIds, attemptsDataArray, carsDataArray);
+  const placesAndScores = createPlaceAndScoreArray(tableData);
+  const rankedTableData = createRankedTableData(tableData, placesAndScores);
+    
+  rankedTableData
+  .slice()
+  .sort(compareFirstAttemptScore)
+  .forEach(
+    ({name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place}) => {
+
+    addRowData(
+      {name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place})
+  })
+
+  clearRowsContainer();
+  tableRowContainer.appendChild(listOfRowsFragment);
+}
+
+export const renderTableSortedBySecondAttempt = (cars, attempts) => {
+  const attemptsDataArray = Object.entries(attempts);
+  const carsDataArray = Object.entries(cars);
+  const carIds = getCarIds(carsDataArray);
+  const tableData = createTableDataArray(carIds, attemptsDataArray, carsDataArray);
+  const placesAndScores = createPlaceAndScoreArray(tableData);
+  const rankedTableData = createRankedTableData(tableData, placesAndScores);
+    
+  rankedTableData
+  .slice()
+  .sort(compareSecondAttemptScore)
+  .forEach(
+    ({name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place}) => {
+
+    addRowData(
+      {name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place})
+  })
+
+  clearRowsContainer();
+  tableRowContainer.appendChild(listOfRowsFragment);
+}
+
+export const renderTableSortedByThirdAttempt = (cars, attempts) => {
+  const attemptsDataArray = Object.entries(attempts);
+  const carsDataArray = Object.entries(cars);
+  const carIds = getCarIds(carsDataArray);
+  const tableData = createTableDataArray(carIds, attemptsDataArray, carsDataArray);
+  const placesAndScores = createPlaceAndScoreArray(tableData);
+  const rankedTableData = createRankedTableData(tableData, placesAndScores);
+    
+  rankedTableData
+  .slice()
+  .sort(compareThirdAttemptScore)
+  .forEach(
+    ({name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place}) => {
+
+    addRowData(
+      {name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place})
+  })
+
+  clearRowsContainer();
+  tableRowContainer.appendChild(listOfRowsFragment);
+}
+
+export const renderTableSortedByFourthAttempt = (cars, attempts) => {
+  const attemptsDataArray = Object.entries(attempts);
+  const carsDataArray = Object.entries(cars);
+  const carIds = getCarIds(carsDataArray);
+  const tableData = createTableDataArray(carIds, attemptsDataArray, carsDataArray);
+  const placesAndScores = createPlaceAndScoreArray(tableData);
+  const rankedTableData = createRankedTableData(tableData, placesAndScores);
+    
+  rankedTableData
+  .slice()
+  .sort(compareFourthAttemptScore)
+  .forEach(
+    ({name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place}) => {
+
+    addRowData(
+      {name, city, car, startNumber, firstAttempt, secondAttempt, thirdAttempt, fourthAttempt, totalScore, place})
+  })
+
+  clearRowsContainer();
   tableRowContainer.appendChild(listOfRowsFragment);
 }

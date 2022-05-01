@@ -20,16 +20,16 @@
       <ul class="table">
 
         <li class="table__row">
-          <ul class="table__row-list">
+          <ul class="table__row-list table__row-list_header">
             <li class="table__row-item">cтартовый номер</li>
             <li class="table__row-item">фио</li>
             <li class="table__row-item">город</li>
             <li class="table__row-item">машина</li>
-            <li class="table__row-item">попытка 1</li>
-            <li class="table__row-item">попытка 2</li>
-            <li class="table__row-item">попытка 3</li>
-            <li class="table__row-item">попытка 4</li>
-            <li class="table__row-item">сумма баллов</li>
+            <li class="table__row-item"><button class="table__row-button first-attempt">попытка 1</button></li>
+            <li class="table__row-item"><button class="table__row-button second-attempt">попытка 2</button></li>
+            <li class="table__row-item"><button class="table__row-button third-attempt">попытка 3</button></li>
+            <li class="table__row-item"><button class="table__row-button fourth-attempt">попытка 4</button></li>
+            <li class="table__row-item"><button class="table__row-button total-score">сумма баллов</button></li>
             <li class="table__row-item">место</li>
           </ul>
         </li>
